@@ -88,11 +88,11 @@ int main(int argc, char* argv[])
 					if (tempCarry > 0ULL)
 						result2Ptr->at(j + k) += tempCarry;
 				}
-				swap(result2Ref, result1Ref);
+				swap(result2Ptr, result1Ptr);
 			}
-			swap(result1Ref, result3Ref);
+			swap(result1Ptr, result3Ptr);
 		}
-		displayResult(result3Ref);
+		displayResult(*result3Ptr);
 		if (argc == 2)
 			break;
 	}
