@@ -1,5 +1,5 @@
 # LargeNumberCalculator
-This program is designed to be able to calculate very large exponential number.
+This program can calculate very large exponential number(positive integer).
 
 # Compile and Execute
 At Linux g++ -o main main.cpp
