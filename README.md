@@ -1,2 +1,2 @@
 # LargeNumberCalculator
-This This program is designed to be able to calculate very large exponential expressions.
+This program can calculate very large exponential number(positive integer).
