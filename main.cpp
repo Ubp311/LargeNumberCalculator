@@ -1,192 +1,194 @@
-#include    <iostream>
-#include    <cstdlib>
-#include    <vector>
-#include    <string>
-#define     UINT_LIMIT  100000000
-#define     UINT_LIMIT_DIGITS   8
+#include	<iostream>
+#include	<string>
+#include	<vector>
+
 
 using namespace std;
 
-vector<vector<unsigned int>> parsingExpression(string str);
-bool counter(vector<unsigned int> valLine);
+const unsigned int	kUIntLimit = 100000000U;
+const unsigned int	kUIntLimitDigitNum = 8U;
 
-string buffer;
-
-vector<vector<unsigned int>> parsingVals;
-vector<unsigned int> result1;
-vector<unsigned int> result2;
-vector<unsigned int> result3;
-vector<unsigned int> factor;
-
-long long iter = 0;
-
-long long    tempAdd;
-long long    tempCarry;
-
-vector<unsigned int> countLine;
+int	parseSyntax(string& str, vector<vector<unsigned int>>& parsedVals);
+bool	counter(vector<unsigned int>& count, vector<unsigned int>& counted);
+void	displayResult(vector<unsigned int>& result);
 
 int main(int argc, char* argv[])
 {
-    while (true)
-    {
-        if(argc == 1)
-        {
-            cout << "Input an exponential expression (positive integers only) : ";
-            cin >> buffer;
-            if (!buffer.compare("exit"))
-                break;
-        }
-        else if(argc == 2)
-            buffer = string(argv[1]);
-        parsingVals = parsingExpression(buffer);
+	while (true)
+	{
+		string	line;
 
-        result3 = parsingVals[parsingVals.size() - 1];
-        for (int i = parsingVals.size() - 2; i >= 0; i--)
-        {
-            result3[0]--;
-            result1 = factor = parsingVals[i];
+		vector<vector<unsigned int>> parsedVals;
+		vector<unsigned int> result1;
+		vector<unsigned int> result2;
+		vector<unsigned int> result3;
+		vector<unsigned int> factor;
 
-            countLine.clear();
-            while (counter(result3))
-            {
-                result2.clear();
-                result2.push_back(0);
-                for (int j = 0; j < factor.size(); j++)
-                {
-                    tempCarry = 0;
-                    int k;
-                    for (k = 0; k < result1.size(); k++)
-                    {
-                        tempAdd = (long long)factor[j] * (long long)result1[k] + tempCarry;
-                        tempCarry = tempAdd / UINT_LIMIT;
-                        tempAdd %= UINT_LIMIT;
-                        if (result2.size() - 1 < j + k)
-                            result2.push_back(0);
-                        if (j + k == result2.size()  - 1 && tempCarry > 0)
-                            result2.push_back(0);
-                        tempCarry += (result2[j + k] + tempAdd) / UINT_LIMIT;
-                        result2[j + k] = (result2[j + k] + tempAdd) % UINT_LIMIT;
-                    }
-                    if (tempCarry > 0)
-                        result2[j + k] += tempCarry;
-                }
-                result1 = result2;
-                iter++;
-                cout << "Iterator : " << iter << endl;
-            }
-            result3 = result1;  
-        }   // The part that calculates the values 
-        for (int i = result3.size() - 1; i >= 0; i--)
-        {
-            if (i == result3.size() - 1)
-                cout << result3[i];
-            else
-            {
-                unsigned int tempVal = result3[i];
-                int digitNum = 0;
-                while (tempVal != 0)
-                {
-                    tempVal /= 10;
-                    digitNum++;
-                }
-                for (int j = 0; j < UINT_LIMIT_DIGITS - digitNum; j++)
-                    cout << "0"; // display result part
-                if (digitNum != 0)
-                    cout << result3[i];
-            }
+		vector<unsigned int>& result1Ref = result1;
+		vector<unsigned int>& result2Ref = result2;
+		vector<unsigned int>& result3Ref = result3;
 
-        }
-        cout << endl;
-    }
+		unsigned long long	tempAdd = 0ULL;
+		unsigned long long	tempCarry = 0ULL;
 
-    //  [223][242][353][220][353]
-    //  [432][595][242][943][230]
-    return 0;
+		vector<unsigned int> countedLine;
+
+		if (argc == 1)
+		{
+			cout << "Input an exponential syntax (positive integers only) : ";
+			cin >> line;
+			if (!line.compare("exit"))
+				break;
+		}
+		else if (argc == 2)
+			line = string(argv[1]);
+		int errorCode = parseSyntax(line, parsedVals);
+		if (errorCode == 1)
+		{
+			cout << "Error : Wrong syntax." << endl;
+			continue;
+		}
+		
+		result3Ref = parsedVals[parsedVals.size() - 1];
+		for (size_t i = parsedVals.size() - 2; i >= 0 && i != (size_t)-1; i--)
+		{
+			size_t	j = 0;
+
+			factor = result1Ref = parsedVals[i];
+			
+			for (; j < result3Ref.size() - 1 && result3Ref[j] == 0U; j++)
+				result3Ref[j] = kUIntLimit - 1U;
+			if (result3Ref[j] == 1U && j == result3Ref.size() - 1)
+				result3Ref.pop_back();
+			result3Ref[j]--;
+
+			countedLine.clear();
+
+			while (counter(result3Ref, countedLine))
+			{
+				result2Ref.clear();
+				result2Ref.push_back(0U);
+				for (j = 0; j < factor.size(); j++)
+				{
+					tempCarry = 0ULL;
+
+					size_t	k = 0;
+					for (; k < result1Ref.size(); k++)
+					{
+						tempAdd = (unsigned long long)factor[j] * (unsigned long long)result1Ref[k] + tempCarry;
+						tempCarry = tempAdd / kUIntLimit;
+						tempAdd %= kUIntLimit;
+						if (result2Ref.size() - 1 < j + k)
+							result2Ref.push_back(0U);
+						if (result2Ref.size() - 1 == j + k && tempCarry > 0ULL)
+							result2Ref.push_back(0U);
+						tempCarry += (result2Ref[j + k] + tempAdd) / kUIntLimit;
+						result2Ref[j + k] = (result2Ref[j + k] + tempAdd) % kUIntLimit;
+					}
+					if (tempCarry > 0ULL)
+						result2Ref[j + k] += tempCarry;
+				}
+				swap(result2Ref, result1Ref);
+			}
+			swap(result1Ref, result3Ref);
+		}
+		displayResult(result3Ref);
+		if (argc == 2)
+			break;
+	}
+
+	return	0;
 }
 
-vector<vector<unsigned int>> parsingExpression(string str)
+int parseSyntax(string& str, vector<vector<unsigned int>>& parsedVals)
 {
-    vector<unsigned int> indices;
-    vector<vector<unsigned int>> resultVals;
-    vector<unsigned int> tempValLine;
-    unsigned int tempVal;
+	int	mul = 1;
 
-    indices.push_back(-1);
-    for(int i = 0; i < str.size() + 1; i++)
-    {
-        if(str[i] == '^' || str[i] == '\0')
-            indices.push_back(i);
-    }
-    for(int i = 0; i < indices.size() - 1; i++)
-    {
-        tempValLine.clear();
-        tempValLine.push_back(0);
-        for(int j = indices[i] + 1; j < indices[i + 1]; j++)
-        {
-            tempVal = 0;
-            if(str[j] >= '0' && str[j] <= '9')
-            {
-                for (int k = 0; k < tempValLine.size(); k++)
-                {
-                    tempValLine[k] *= 10;
-                    if(k == 0)
-                        tempValLine[k] += str[j] - '0';
-                    tempValLine[k] += tempVal;
-                    if (tempValLine[k] >= UINT_LIMIT)
-                    {
-                        tempVal = tempValLine[k] / UINT_LIMIT;
-                        tempValLine[k] %= UINT_LIMIT;
-                        if(k == tempValLine.size() - 1)
-                        {
-                            tempValLine.push_back(tempVal);
-                            break;
-                        }
-                    }
-                }
-            } // "100000000000000"
-              // [--0][10]
-        }
-        resultVals.push_back(tempValLine);
-    }
+	size_t	index1 = 0;
+	size_t	index2 = 0;
 
-    return resultVals;
+	if (parsedVals.size() == 0)
+		parsedVals.push_back(vector<unsigned int>());
+	if (parsedVals[0].size() == 0)
+		parsedVals[0].push_back(0U);
+	for (int i = 0; i < str.size(); i++)
+	{
+		if (str[i] >= '0' && str[i] <= '9')
+		{
+			if (mul == kUIntLimit)
+			{
+				mul = 1;
+				parsedVals[index1].push_back(0U);
+				index2++;
+			}
+			parsedVals[index1][index2] += mul * (str[i] - '0');
+			mul *= 10;
+		}
+		else if (str[i] == '^')
+		{
+			mul = 1;
+			parsedVals.push_back(vector<unsigned int>());
+			index1++;
+			parsedVals[index1].push_back(0U);
+			index2 = 0;
+		}
+		else
+			return	1;
+	}
+
+	return	0;
 }
 
-bool counter(vector<unsigned int> valLine)
+bool	counter(vector<unsigned int>& count, vector<unsigned int>& counted)
 {
-    bool continueState = false;
-    unsigned int i = 0;
-    unsigned int matchCount = 0;
+	size_t	i = 0;
 
-    if(countLine.size() == 0)
-        countLine.push_back(0);
-    while(true)
-    {
-        if(countLine[i] == valLine[i])
-        {
-            matchCount++;
-            if(matchCount == valLine.size())
-            {
-                continueState = false;
-                break;
-            }
-        }
-        if(countLine[i] == UINT_LIMIT - 1)
-        {
-            countLine[i] = 0;
-            if(countLine.size() < i + 2)
-                countLine.push_back(0);
-            countLine[++i]++;
-        }
-        else
-        {
-            countLine[i]++;
-            continueState = true;
-            break;
-        }
-    }
-    // [243][423][425]
-    //      [  1][  0]
+	size_t	matchCount = 0;
 
-    return continueState;
-} 
+	if (count.size() == 0)
+		count.push_back(0U);
+	if (counted.size() == 0)
+		counted.push_back(0U);
+	if (count.size() == counted.size())
+	{
+		for (size_t j = 0; j < count.size(); j++)
+		{
+			if (count[matchCount] == counted[matchCount])
+				matchCount++;
+			else
+				break;
+		}
+		if (matchCount == count.size())
+			return	false;
+	}
+	for (; counted[i] == kUIntLimit - 1U; i++)
+	{
+		counted[i] = 0U;
+		if (counted.size() < i + 2)
+			counted.push_back(0U);
+	}
+	counted[i]++;
+
+	return	true;
+}
+
+void	displayResult(vector<unsigned int>& result)
+{
+	cout << result[result.size() - 1];
+	for (size_t i = result.size() - 2; i >= 0 && i != (size_t)-1; i--)
+	{
+		unsigned int	tempVal = result[i];
+		int	digitNum = 0;
+
+		while (tempVal != 0)
+		{
+			tempVal /= 10U;
+			digitNum++;
+		}
+		for (int j = 0; j < kUIntLimitDigitNum - digitNum; j++)
+			cout << '0';
+		if (digitNum != 0)
+			cout << result[i];
+	}
+	cout << endl;
+}
