@@ -24,9 +24,9 @@ int main(int argc, char* argv[])
 		vector<unsigned int> result3;
 		vector<unsigned int> factor;
 
-		vector<unsigned int>*result1Ptr = &result1;
-		vector<unsigned int>*result2Ptr = &result2;
-		vector<unsigned int>*result3Ptr = &result3;
+		vector<unsigned int>& result1Ref = result1;
+		vector<unsigned int>& result2Ref = result2;
+		vector<unsigned int>& result3Ref = result3;
 
 		unsigned long long	tempAdd = 0ULL;
 		unsigned long long	tempCarry = 0ULL;
@@ -54,45 +54,45 @@ int main(int argc, char* argv[])
 		{
 			size_t	j = 0;
 
-			factor = *result1Ptr = parsedVals[i];
+			factor = result1Ref = parsedVals[i];
 			
-			for (; j < result3Ptr->size() - 1 && result3Ptr->at(j) == 0U; j++)
-				result3Ptr->at(j) = kUIntLimit - 1U;
-			if (result3Ptr->at(j) == 1U && j == result3Ptr->size()s - 1)
-				result3Ptr.pop_back();
-			result3Ptr->at(j)--;
+			for (; j < result3Ref.size() - 1 && result3Ref[j] == 0U; j++)
+				result3Ref[j] = kUIntLimit - 1U;
+			if (result3Ref[j] == 1U && j == result3Ref.size() - 1)
+				result3Ref.pop_back();
+			result3Ref[j]--;
 
 			countedLine.clear();
 
-			while (counter(*result3Ptr, countedLine))
+			while (counter(result3Ref, countedLine))
 			{
-				result2Ptr->clear();
-				result2Ptr->push_back(0U);
+				result2Ref.clear();
+				result2Ref.push_back(0U);
 				for (j = 0; j < factor.size(); j++)
 				{
 					tempCarry = 0ULL;
 
 					size_t	k = 0;
-					for (; k < result1Ptr->size(); k++)
+					for (; k < result1Ref.size(); k++)
 					{
-						tempAdd = (unsigned long long)factor[j] * (unsigned long long)result1Ref->at(k) + tempCarry;
+						tempAdd = (unsigned long long)factor[j] * (unsigned long long)result1Ref[k] + tempCarry;
 						tempCarry = tempAdd / kUIntLimit;
 						tempAdd %= kUIntLimit;
-						if (result2Ptr->size() - 1 < j + k)
-							result2Ptr->push_back(0U);
-						if (result2Ptr->size() - 1 == j + k && tempCarry > 0ULL)
-							result2Ptr->push_back(0U);
-						tempCarry += (result2Ptr->at(j + k) + tempAdd) / kUIntLimit;
-						result2Ptr->at(j + k) = (result2Ptr->at(j + k) + tempAdd) % kUIntLimit;
+						if (result2Ref.size() - 1 < j + k)
+							result2Ref.push_back(0U);
+						if (result2Ref.size() - 1 == j + k && tempCarry > 0ULL)
+							result2Ref.push_back(0U);
+						tempCarry += (result2Ref[j + k] + tempAdd) / kUIntLimit;
+						result2Ref[j + k] = (result2Ref[j + k] + tempAdd) % kUIntLimit;
 					}
 					if (tempCarry > 0ULL)
-						result2Ptr->at(j + k) += tempCarry;
+						result2Ref[j + k] += tempCarry;
 				}
-				swap(result2Ptr, result1Ptr);
+				swap(result2Ref, result1Ref);
 			}
-			swap(result1Ptr, result3Ptr);
+			swap(result1Ref, result3Ref);
 		}
-		displayResult(*result3Ptr);
+		displayResult(result3Ref);
 		if (argc == 2)
 			break;
 	}
